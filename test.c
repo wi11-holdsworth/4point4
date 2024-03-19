@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
 	// fork to create child process
 	int pid = fork();
 
-	if (pid) {
+	if (pid == 0) {
 		// child execs wc -l and prints output with pipe in as input
 		close(fd[1]); // close write
 
