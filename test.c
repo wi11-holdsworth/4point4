@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 		dup2(fd[1], STDOUT_FILENO);
 
 		// close write
-		close(fd[0]);
+		close(fd[1]);
 
 		char *args[] = {"sh", "-c", "ls *.c", NULL};
 		execvp("sh", args);
