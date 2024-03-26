@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <glob.h>
+#include <sys/wait.h>
 
 
 int main(int argc, char** argv) {
@@ -12,9 +14,9 @@ int main(int argc, char** argv) {
 	// fork to create child process
 	int pid = fork();
 
-	if (pid == 0) {
-		// child execs wc -l and prints output with pipe in as input
-		close(fd[1]); // close write
+	if (pid > 0) {
+		// parent execs wc -l and prints output with pipe in as input
+		close(fd[1]); // close write 
 
 		// read from pipe to standard input
 		dup2(fd[0], STDIN_FILENO);
@@ -26,7 +28,7 @@ int main(int argc, char** argv) {
 		char *args[] = {"wc", "-l", NULL};
 		execvp("wc", args);
 	} else {
-		// parent execs ls *.c and pipes output to child
+		// child execs ls *.c and pipes output to parent 
 		close(fd[0]); // close read
 		
 		// write to standard output
@@ -34,9 +36,20 @@ int main(int argc, char** argv) {
 
 		// close write
 		close(fd[1]);
+	
+		// initialise glob buffer
+		glob_t globbuf;
 
-		char *args[] = {"sh", "-c", "ls *.c", NULL};
-		execvp("sh", args);
+		// number of arguments
+		globbuf.gl_offs = 1;
+
+		glob("*.c", GLOB_DOOFFS, NULL, &globbuf);
+		globbuf.gl_pathv[0] = "ls";
+		execvp("ls", &globbuf.gl_pathv[0]);
+
+		int status;
+		waitpid(pid, &status, 0);
+		printf("\n");
 	}
 
 	return EXIT_SUCCESS;
