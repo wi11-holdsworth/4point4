@@ -46,10 +46,6 @@ int main(int argc, char** argv) {
 		glob("*.c", GLOB_DOOFFS, NULL, &globbuf);
 		globbuf.gl_pathv[0] = "ls";
 		execvp("ls", &globbuf.gl_pathv[0]);
-
-		int status;
-		waitpid(pid, &status, 0);
-		printf("\n");
 	}
 
 	return EXIT_SUCCESS;
